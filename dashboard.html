@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensor Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .sensor-card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px;
+            flex: 1 1 200px;
+        }
+        .sensor-card h2 {
+            margin-top: 0;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sensor Dashboard</h1>
+    <div class="container">
+        {% for sensor, value in sensor_data.items() %}
+        <div class="sensor-card">
+            <h2>{{ sensor }}</h2>
+            <p>Value: <span id="{{ sensor }}">{{ value }}</span></p>
+            <p>Threshold: {{ thresholds[sensor] }}</p>
+            <p class="{{ 'error' if value > thresholds[sensor] else '' }}">
+                Status: {{ 'Exceeded' if value > thresholds[sensor] else 'Normal' }}
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+
+ <script>
+console.log("JavaScript loaded");
+
+function fetchData() {
+    console.log("Fetching data");
+    fetch('/data')
+        .then(response => {
+            if (!response.ok) {
+                console.error("HTTP error", response.status);
+                throw new Error("HTTP error, status of " + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            for (const sensor in data) {
+                console.log(sensor, data[sensor]);
+                document.getElementById(sensor).innerText = data[sensor];
+            }
+        })
+        .catch(error => {
+            console.error("Fetch failed: ", error);
+        })
+        .finally(() => {
+            setTimeout(fetchData, 1000);
+        });
+}
+
+fetchData();
+</script>
+
+</body>
+</html>
